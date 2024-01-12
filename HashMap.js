@@ -5,6 +5,7 @@ class HashMap {
     this.load_factor = 0.75;
     this.buckets = Array(capacity);
     this.bucketsFilled = 0;
+    this.initCapacity = capacity;
   }
 
   hash(keyToHash) {
@@ -21,11 +22,19 @@ class HashMap {
 
   set(key, value) {
     // check capacity and tweak if needed
-    this.buckets = CheckAndUpdateCapacity(
-      this.buckets,
-      this.bucketsFilled,
-      this.load_factor
-    );
+    if (this.bucketsFilled / this.buckets.length > this.load_factor) {
+      this.bucketsFilled = 0;
+      const oldBuckets = this.buckets;
+      this.buckets = Array(this.buckets.length * 2);
+
+      oldBuckets.forEach((bucket, index) => {
+        for (var i = 0; i < bucket.getSize(); i++) {
+          const node = bucket.at(i);
+          this.set(node.value.key, node.value.value);
+        }
+      });
+    }
+
     const index = this.hash(key);
     AccessingBucketThroughIndex(index, this.capacity);
 
@@ -77,43 +86,86 @@ class HashMap {
 
   remove(key) {
     // see if this key exists, if it does remove it otherwise return null
+    const index = this.hash(key);
+    AccessingBucketThroughIndex(index);
+
+    if (this.buckets[index] == undefined) {
+      return null;
+    } else {
+      for (var i = 0; i < this.buckets[index].getSize(); i++) {
+        if (this.buckets[index].at(i).value.key == key) {
+          // remove it
+          this.buckets[index].removeAt(i);
+        }
+      }
+
+      if (this.buckets[index].getSize() == 0) {
+        this.buckets[index] = undefined;
+      }
+    }
   }
 
   length() {
     // finds how many keys are in the map
+    var length = 0;
+
+    for (var i = 0; i < this.buckets.length; i++) {
+      if (this.buckets[i] != undefined) {
+        const bucketSize = this.buckets[i].getSize();
+        length += bucketSize;
+      }
+    }
+    return length;
   }
 
   clear() {
     // clears the entire hash and resets it
+    this.buckets = Array(this.initCapacity);
   }
 
   keys() {
     // returns an array containing all the keys inside the hash map
+    const keys = [];
+    for (var i = 0; i < this.buckets.length; i++) {
+      if (this.buckets[i] != undefined) {
+        var currentNode = this.buckets[i].getHead();
+        while (currentNode != null) {
+          keys.push(currentNode.value.value.key);
+          currentNode = currentNode.pointer;
+        }
+      }
+    }
+    return keys;
   }
 
   values() {
-    // returns an array of all the values inside the hash map
+    const values = [];
+    for (var i = 0; i < this.buckets.length; i++) {
+      if (this.buckets[i] != undefined) {
+        var currentNode = this.buckets[i].getHead();
+        while (currentNode != null) {
+          values.push(currentNode.value.value.value);
+          currentNode = currentNode.pointer;
+        }
+      }
+    }
+    return values;
   }
 
   entries() {
-    // returs an array containing all key,value pairs in the hash map
+    const entries = [];
+    for (var i = 0; i < this.buckets.length; i++) {
+      if (this.buckets[i] != undefined) {
+        var currentNode = this.buckets[i].getHead();
+        while (currentNode != null) {
+          entries.push(currentNode.value.value);
+          currentNode = currentNode.pointer;
+        }
+      }
+    }
+    return entries;
   }
 }
-
-const CheckAndUpdateCapacity = (
-  currentBuckets,
-  currentEntryAmount,
-  loadFactor
-) => {
-  if (currentEntryAmount / currentBuckets.length > loadFactor) {
-    newBuckets = Array(currentBuckets.length * 2);
-    currentBuckets.forEach((bucket, index) => {
-      newBuckets[index] = bucket;
-    });
-    return newBuckets;
-  }
-  return currentBuckets;
-};
 
 const AccessingBucketThroughIndex = (index, capacity) => {
   if (index < 0 || index >= capacity) {
@@ -121,12 +173,4 @@ const AccessingBucketThroughIndex = (index, capacity) => {
   }
 };
 
-const map = new HashMap(100);
-
-Array.from({ length: 100 }, (_, i) => {
-  map.set('key' + i, i);
-});
-console.log(map);
-console.log(map.has('key50'));
-
-console.log(map.has('key510'));
+module.exports = { HashMap };
