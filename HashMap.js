@@ -43,7 +43,7 @@ class HashMap {
       if (bucket !== undefined) {
         let node = bucket.getHead();
         while (node) {
-          this.set(node.value.value.key, node.value.value.value);
+          this.set(node.value.key, node.value.value);
           node = node.pointer;
         }
       }
@@ -65,10 +65,11 @@ class HashMap {
 
     // Search for the key in the linked list
     for (
-      let node = this.buckets[index].head;
+      let node = this.buckets[index].getHead();
       node !== null;
       node = node.pointer
     ) {
+      console.log(node);
       if (node.value.key === key) {
         // Update existing key
         node.value.value = value;
@@ -76,7 +77,7 @@ class HashMap {
       }
     }
 
-    this.buckets[index].append(new Node({ key, value }));
+    this.buckets[index].append({ key, value });
     this.elementCount++;
   }
 
@@ -88,8 +89,8 @@ class HashMap {
       return null;
     } else {
       for (var i = 0; i < this.buckets[index].getSize(); i++) {
-        if (this.buckets[index].at(i).value.key == key) {
-          return this.buckets[index].at(i).value.value;
+        if (this.buckets[index].at(i).key == key) {
+          return this.buckets[index].at(i).value;
         }
       }
     }
@@ -103,7 +104,7 @@ class HashMap {
       return false;
     } else {
       for (var i = 0; i < this.buckets[index].getSize(); i++) {
-        if (this.buckets[index].at(i).value.key == key) {
+        if (this.buckets[index].at(i).key == key) {
           return true;
         }
       }
@@ -119,7 +120,7 @@ class HashMap {
       return null;
     } else {
       for (var i = 0; i < this.buckets[index].getSize(); i++) {
-        if (this.buckets[index].at(i).value.key == key) {
+        if (this.buckets[index].at(i).key == key) {
           // remove it
           this.buckets[index].removeAt(i);
           this.elementCount--;
@@ -175,7 +176,7 @@ class HashMap {
       if (bucket !== undefined) {
         let currentNode = bucket.getHead();
         while (currentNode) {
-          yield currentNode.value.value;
+          yield currentNode.value;
           currentNode = currentNode.pointer;
         }
       }
