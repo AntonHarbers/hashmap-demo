@@ -21,7 +21,9 @@ for (var i = 0; i < map.entries().length; i++) {
   console.log(map.entries()[i]);
 }
 map.set('name1', 'Swain');
-map.set('Hello', 'World');
+map.set('Hello', 'hello');
+map.set('Hello', 'bye');
+
 console.log('----     Added Swain Name   and hello world  ----');
 console.log('Length: ' + map.length());
 console.log('Keys: ' + map.keys());
@@ -29,7 +31,6 @@ console.log('Values: ' + map.values());
 for (var i = 0; i < map.entries().length; i++) {
   console.log(map.entries()[i]);
 }
-map.remove('Hello');
 console.log('----     Removed Hello Key    ----');
 console.log('Length: ' + map.length());
 console.log('Keys: ' + map.keys());
@@ -37,3 +38,6 @@ console.log('Values: ' + map.values());
 for (var i = 0; i < map.entries().length; i++) {
   console.log(map.entries()[i]);
 }
+console.log(map);
+
+console.log(map);
