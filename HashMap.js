@@ -7,6 +7,7 @@ class HashMap {
     this.bucketsFilled = 0;
     this.initCapacity = capacity;
     this.isResizing = false;
+    this.elementCount = 0;
   }
 
   hash(keyToHash) {
@@ -33,12 +34,13 @@ class HashMap {
   resize() {
     this.isResizing = true;
     this.bucketsFilled = 0;
+    this.elementCount = 0;
     const oldBuckets = this.buckets;
 
     this.buckets = Array(this.buckets.length * 2);
 
     oldBuckets.forEach((bucket) => {
-      if (bucket != undefined) {
+      if (bucket !== undefined) {
         let node = bucket.getHead();
         while (node) {
           this.set(node.value.value.key, node.value.value.value);
@@ -54,7 +56,7 @@ class HashMap {
     this.checkResize();
 
     const index = this.hash(key);
-    AccessingBucketThroughIndex(index, this.capacity);
+    AccessingBucketThroughIndex(index, this.buckets.length);
 
     if (this.buckets[index] === undefined) {
       this.buckets[index] = new LinkedList();
@@ -75,6 +77,7 @@ class HashMap {
     }
 
     this.buckets[index].append(new Node({ key, value }));
+    this.elementCount++;
   }
 
   get(key) {
@@ -119,6 +122,7 @@ class HashMap {
         if (this.buckets[index].at(i).value.key == key) {
           // remove it
           this.buckets[index].removeAt(i);
+          this.elementCount--;
         }
       }
 
@@ -130,63 +134,52 @@ class HashMap {
 
   length() {
     // finds how many keys are in the map
-    var length = 0;
-
-    for (var i = 0; i < this.buckets.length; i++) {
-      if (this.buckets[i] != undefined) {
-        const bucketSize = this.buckets[i].getSize();
-        length += bucketSize;
-      }
-    }
-    return length;
+    return this.elementCount;
   }
 
   clear() {
     // clears the entire hash and resets it
     this.buckets = Array(this.initCapacity);
+    this.elementCount = 0;
   }
 
   keys() {
     // returns an array containing all the keys inside the hash map
     const keys = [];
-    for (var i = 0; i < this.buckets.length; i++) {
-      if (this.buckets[i] != undefined) {
-        var currentNode = this.buckets[i].getHead();
-        while (currentNode != null) {
-          keys.push(currentNode.value.value.key);
-          currentNode = currentNode.pointer;
-        }
-      }
+    for (let item of this.itemIterator()) {
+      keys.push(item.key);
     }
     return keys;
   }
 
   values() {
     const values = [];
-    for (var i = 0; i < this.buckets.length; i++) {
-      if (this.buckets[i] != undefined) {
-        var currentNode = this.buckets[i].getHead();
-        while (currentNode != null) {
-          values.push(currentNode.value.value.value);
-          currentNode = currentNode.pointer;
-        }
-      }
+    for (let item of this.itemIterator()) {
+      values.push(item.value);
     }
     return values;
   }
 
   entries() {
     const entries = [];
-    for (var i = 0; i < this.buckets.length; i++) {
-      if (this.buckets[i] != undefined) {
-        var currentNode = this.buckets[i].getHead();
-        while (currentNode != null) {
-          entries.push(currentNode.value.value);
+    for (let item of this.itemIterator()) {
+      entries.push(item);
+    }
+    return entries;
+  }
+
+  *itemIterator() {
+    for (let i = 0; i < this.buckets.length; i++) {
+      let bucket = this.buckets[i];
+
+      if (bucket !== undefined) {
+        let currentNode = bucket.getHead();
+        while (currentNode) {
+          yield currentNode.value.value;
           currentNode = currentNode.pointer;
         }
       }
     }
-    return entries;
   }
 }
 
